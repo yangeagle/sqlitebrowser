@@ -8,6 +8,11 @@
 #include "sqlite3TokenTypes.hpp"
 #include <antlr/LLkParser.hpp>
 
+
+	#include <iostream>
+	#include "UnicodeCharBuffer.hpp"
+	#include "UnicodeCharScanner.hpp"
+
 class CUSTOM_API Sqlite3Parser : public ANTLR_USE_NAMESPACE(antlr)LLkParser, public sqlite3TokenTypes
 {
 public:

@@ -7,9 +7,30 @@
 #include <antlr/InputBuffer.hpp>
 #include <antlr/BitSet.hpp>
 #include "sqlite3TokenTypes.hpp"
-#include <antlr/CharScanner.hpp>
-class CUSTOM_API Sqlite3Lexer : public ANTLR_USE_NAMESPACE(antlr)CharScanner, public sqlite3TokenTypes
+
+// Include correct superclass header with a header statement for example:
+// header "post_include_hpp" {
+// #include "UnicodeCharScanner.hpp"
+// }
+// Or....
+// header {
+// #include "UnicodeCharScanner.hpp"
+// }
+
+
+	#include <iostream>
+	#include "UnicodeCharBuffer.hpp"
+	#include "UnicodeCharScanner.hpp"
+
+class CUSTOM_API Sqlite3Lexer : public UnicodeCharScanner, public sqlite3TokenTypes
 {
+
+public:
+	Sqlite3Lexer( UnicodeCharBuffer& ib )
+	: UnicodeCharScanner(ib,true)
+	{
+		initLiterals();
+	}
 private:
 	void initLiterals();
 public:

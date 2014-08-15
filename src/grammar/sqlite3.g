@@ -1,15 +1,21 @@
+header {
+	#include <iostream>
+	#include "UnicodeCharBuffer.hpp"
+	#include "UnicodeCharScanner.hpp"
+}
+
 options {
   language="Cpp";
   genHashLines=false;
 }
 
-class Sqlite3Lexer extends Lexer;
+class Sqlite3Lexer extends Lexer("UnicodeCharScanner");
 options {
   k=2;
   exportVocab=sqlite3;
+  charVocabulary='\u0000'..'\uFFFE';
   caseSensitive=false;
   caseSensitiveLiterals=false;
-  charVocabulary='\u0000'..'\uFFFE';
 }
 
 tokens {
@@ -87,6 +93,15 @@ tokens {
   KEYWORDASCOLUMNNAME;
 }
 
+{
+public:
+	Sqlite3Lexer( UnicodeCharBuffer& ib )
+	: UnicodeCharScanner(ib,true)
+	{
+		initLiterals();
+	}
+}
+
 protected
 DIGIT : '0'..'9' ;
 
@@ -94,9 +109,7 @@ protected DOT:;
 
 ID
   :
-  // 00C0 - 02B8 load of good looking unicode chars
-  // there might be more allowed characters
-  ('a'..'z'|'_') ('a'..'z'|'0'..'9'|'_'|'\u0080'..'\u02B8')*
+  ('a'..'z'|'_') ('a'..'z'|(DIGIT)|'_'|'\u0080'..'\uFFFE')*
   ;
 
 QUOTEDID

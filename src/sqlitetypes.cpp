@@ -131,7 +131,8 @@ Table Table::parseSQL(const QString &sSQL)
 {
     std::stringstream s;
     s << sSQL.toStdString();
-    Sqlite3Lexer lex(s);
+    UnicodeCharBuffer buffer(s);
+    Sqlite3Lexer lex(buffer);
 
     Sqlite3Parser parser(lex);
 

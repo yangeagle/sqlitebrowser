@@ -41,7 +41,10 @@ HEADERS += \
     SqlExecutionArea.h \
     VacuumDialog.h \
     DbStructureModel.h \
-    Application.h
+    Application.h \
+    grammar/UnicodeCharBuffer.hpp \
+    grammar/UnicodeCharScanner.hpp \
+    grammar/MismatchedUnicodeCharException.hpp
 
 SOURCES += \
     sqlitedb.cpp \
@@ -64,7 +67,8 @@ SOURCES += \
     SqlExecutionArea.cpp \
     VacuumDialog.cpp \
     DbStructureModel.cpp \
-    Application.cpp
+    Application.cpp \
+    grammar/MismatchedUnicodeCharException.cpp
 
 RESOURCES += icons/icons.qrc
 

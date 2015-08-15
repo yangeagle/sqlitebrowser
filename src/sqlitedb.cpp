@@ -22,6 +22,22 @@ int collCompare(void* /*pArg*/, int /*eTextRepA*/, const void* sA, int /*eTextRe
     return sizeA - sizeB;
 }
 
+static int sqlite_compare_utf16( void* /*arg*/,int size1, const void *str1, int size2, const void* str2)
+{
+    const QString string1 = QString::fromRawData(reinterpret_cast<const QChar*>(str1), size1 / sizeof(QChar));
+    const QString string2 = QString::fromRawData(reinterpret_cast<const QChar*>(str2), size2 / sizeof(QChar));
+
+    return QString::compare(string1, string2, Qt::CaseSensitive);
+}
+
+static int sqlite_compare_utf16ci( void* /*arg*/,int size1, const void *str1, int size2, const void* str2)
+{
+    const QString string1 = QString::fromRawData(reinterpret_cast<const QChar*>(str1), size1 / sizeof(QChar));
+    const QString string2 = QString::fromRawData(reinterpret_cast<const QChar*>(str2), size2 / sizeof(QChar));
+
+    return QString::compare(string1, string2, Qt::CaseInsensitive);
+}
+
 void collation_needed(void* /*pData*/, sqlite3* db, int eTextRep, const char* sCollationName)
 {
     QMessageBox::StandardButton reply = QMessageBox::question(
@@ -99,6 +115,11 @@ bool DBBrowserDB::open(const QString& db)
 
     if (_db)
     {
+        // add UTF16 collation (comparison is performed by QString functions)
+        sqlite3_create_collation(_db, "UTF16", SQLITE_UTF16, 0, sqlite_compare_utf16);
+        // add UTF16CI (case insensitive) collation (comparison is performed by QString functions)
+        sqlite3_create_collation(_db, "UTF16CI", SQLITE_UTF16, 0, sqlite_compare_utf16ci);
+       
         // register collation callback
         sqlite3_collation_needed(_db, NULL, collation_needed);
 
@@ -885,7 +906,7 @@ bool DBBrowserDB::renameColumn(const QString& tablename, const QString& name, sq
     }
 
     // Create savepoint to be able to go back to it in case of any error
-    if(!executeSQL("SAVEPOINT sqlitebrowser_rename_column"))
+    if(!executeSQL("SAVEPOINT sqlitebrowser_rename_column", false))
     {
         lastErrorMessage = tr("renameColumn: creating savepoint failed. DB says: %1").arg(lastErrorMessage);
         qWarning() << lastErrorMessage;
@@ -987,7 +1008,7 @@ bool DBBrowserDB::renameColumn(const QString& tablename, const QString& name, sq
     }
 
     // Release the savepoint - everything went fine
-    if(!executeSQL("RELEASE SAVEPOINT sqlitebrowser_rename_column;"))
+    if(!executeSQL("RELEASE SAVEPOINT sqlitebrowser_rename_column;", false))
     {
         lastErrorMessage = tr("renameColumn: releasing savepoint failed. DB says: %1").arg(lastErrorMessage);
         qWarning() << lastErrorMessage;
